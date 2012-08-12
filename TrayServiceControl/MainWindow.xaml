@@ -1,0 +1,107 @@
+﻿<Window x:Class="TrayServiceControl.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Options" Height="400" ShowInTaskbar="False" 
+        WindowStyle="ToolWindow" 
+        Loaded="OnLoaded" 
+        Initialized="OnInitialized"
+        Visibility="Hidden">
+    <Grid>
+        <Grid Visibility="Hidden">
+            <!---TODO: more sensible way of having a context menu?-->
+            <Grid.ContextMenu>
+                <ContextMenu x:Name="RightClickMenu" >
+                    <MenuItem Header="Options" Command="{Binding OptionsCommand}"></MenuItem>
+                    <Separator/>
+                    <MenuItem Header="Exit" Command="{Binding QuitCommand}"></MenuItem>
+                </ContextMenu>
+            </Grid.ContextMenu>
+        </Grid>
+        <Grid Visibility="Hidden">
+            <!---TODO: more sensible way of having a context menu?-->
+            <Grid.ContextMenu>
+                <ContextMenu x:Name="EmptyMenu">
+                    <MenuItem Header="Select Services to show from Options" IsEnabled="False"/>
+                </ContextMenu>
+            </Grid.ContextMenu>
+        </Grid>        
+        <Grid Visibility="Hidden">
+            <!---TODO: more sensible way of having a context menu?-->
+            <Grid.ContextMenu>
+                <ContextMenu x:Name="LeftClickMenu" ItemsSource="{Binding FilteredServices}">
+                    <ContextMenu.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock 
+                                    Text="{Binding DisplayName}"
+                                    Width="225" 
+                                    VerticalAlignment="Center"
+                                    Margin="4,0,4,0" />
+                                <TextBlock
+                                    Text="{Binding Pid}"
+                                    Width="50" 
+                                    VerticalAlignment="Center"
+                                    Margin="4,0,4,0" />
+                                <Button 
+                                    Width="27" Height="27" 
+                                    Visibility="{Binding StartVisibility}" 
+                                    Command="{Binding StartServiceCommand}" 
+                                    Margin="4,0,4,0" >
+                                    <Image Source="Resources/play.png" />
+                                </Button>
+                                <Button 
+                                    Width="27" Height="27"
+                                    Visibility="{Binding StopVisibility}" 
+                                    Command="{Binding StopServiceCommand}" 
+                                    Margin="4,0,4,0" >
+                                    <Image Source="Resources/stop.png" />
+                                </Button>
+                                <Button Click="AttachClickHack"
+                                    Width="27" Height="27"
+                                    Visibility="{Binding AttachVisibility}" 
+                                    Command="{Binding AttachCommand}" 
+                                    Margin="4,0,4,0" 
+                                    ContextMenuService.Placement="Bottom">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Style.Resources>
+                                                <Style TargetType="Image">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsEnabled" Value="False">
+                                                            <Setter Property="Opacity" Value="0.5" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Style.Resources>
+                                        </Style>
+                                    </Button.Style>
+                                    <Image Source="Resources/bug.png" />
+
+                                    <Button.ContextMenu>
+                                        <ContextMenu ItemsSource="{Binding DebuggerContextMenu}">
+                                            <ContextMenu.ItemContainerStyle>
+                                                <Style TargetType="MenuItem">
+                                                    <Setter Property="Header" Value="{Binding DebuggerName}" />
+                                                    <Setter Property="Command" Value="{Binding Attach}" />
+                                                    <Setter Property="CommandParameter" Value="{Binding DebuggerPid}" />
+                                                </Style>
+                                            </ContextMenu.ItemContainerStyle>
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
+                                </Button>                                
+                                <Button 
+                                    Width="27" Height="27" 
+                                    Visibility="{Binding DetachVisibility}" 
+                                    Command="{Binding DetachCommand}"
+                                    Margin="4,0,4,0">
+                                    <Image Source="Resources/cancel.png" />
+                                </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ContextMenu.ItemTemplate>
+                </ContextMenu>
+            </Grid.ContextMenu>
+        </Grid>
+        <!-- -->
+     </Grid>
+</Window>

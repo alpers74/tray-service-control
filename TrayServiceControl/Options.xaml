@@ -1,0 +1,27 @@
+﻿<Window x:Class="TrayServiceControl.Options"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Options" Height="500" Width="700" Closed="OnClosed" Icon="Resources/SystemOptions.ico">
+    <Grid>
+        <DataGrid ItemsSource="{Binding Services}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Service" Binding="{Binding ServiceName}" IsReadOnly="True" Width="200" ></DataGridTextColumn>
+                <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" IsReadOnly="True" Width="300"></DataGridTextColumn>
+                <DataGridTemplateColumn Header="Show in menu" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <!-- TODO: Why wont this binding work? -->
+                            <CheckBox 
+                                IsChecked="{Binding ShowInMenu, Mode=TwoWay}" 
+                                Checked="CheckedHack"
+                                Unchecked="CheckedHack"
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center"></CheckBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </Grid>
+</Window>
