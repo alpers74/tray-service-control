@@ -1,4 +1,4 @@
-﻿using System.IO;
+ using System.IO;
 using System.Linq;
 using EnvDTE;
 
@@ -27,7 +27,7 @@ namespace TrayServiceControl.Debugging
         {
             using (new MessageFilter())
             {
-                var processes = _dte.Debugger.LocalProcesses.OfType<Process>().ToArray();
+                var processes = _dte.Debugger.DebuggedProcesses.OfType<Process>().ToArray();
                 var process = processes.SingleOrDefault(x => x.ProcessID == pid);
                 if (process != null)
                     process.Detach();
@@ -35,6 +35,16 @@ namespace TrayServiceControl.Debugging
                 //_dte.Debugger.DetachAll();
             }
         }
+
+        public bool IsAttachedTo(int pid)
+        {
+            using (new MessageFilter())
+            {
+                var processes = _dte.Debugger.DebuggedProcesses.OfType<Process>().ToArray();
+                return processes.Any(x => x.ProcessID == pid);
+            }
+        }
+        
         public string Version { get { using (new MessageFilter()) { return _dte.Version; } } }
         public string Solution { get { using (new MessageFilter()) { return 
             _dte.Solution.IsOpen 
