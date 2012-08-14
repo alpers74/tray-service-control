@@ -36,12 +36,12 @@ namespace TrayServiceControl
             var process = ServiceControl.ServiceToProcess(Service);
 
             AttachCommand = new ActionCommand(() => { },
-                IsElevated &&
                 Service.Status == ServiceControllerStatus.Running &&
                 VsEnvironment.Debuggers.Any());
 
-            DetachCommand = new ActionCommand(() => { Detach(null); },
-                IsElevated &&
+            var debugger = VsEnvironment.Debuggers.FirstOrDefault(p => p.IsAttachedTo(process.Id));
+
+            DetachCommand = new ActionCommand(() => { Detach(debugger); },
                 Service.Status == ServiceControllerStatus.Running &&
                 VsEnvironment.Debuggers.Any());
 
@@ -49,16 +49,14 @@ namespace TrayServiceControl
             StartServiceCommand = new ActionCommand(Start);
             StopServiceCommand = new ActionCommand(Stop);
 
-
             SetPid();
-
             if (Service.Status == ServiceControllerStatus.Running)
             {
                 StartVisibility = System.Windows.Visibility.Collapsed;
                 StopVisibility = System.Windows.Visibility.Visible;
-
-                AttachVisibility = System.Windows.Visibility.Visible;
-                DetachVisibility = System.Windows.Visibility.Collapsed;
+                
+                AttachVisibility = (debugger == null) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+                DetachVisibility = (debugger == null) ? System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
             }
             else
             {
@@ -77,10 +75,8 @@ namespace TrayServiceControl
             {
                 // Perhaps use yield and observable to make this async
                 Service.Stop();
-                //StartName = "Stopping";
                 // TODO: This could take time - make async
                 Service.WaitForStatus(ServiceControllerStatus.Stopped);
-                //StartName = "Start";
 
                 StartVisibility = System.Windows.Visibility.Visible;
                 StopVisibility = System.Windows.Visibility.Collapsed;
@@ -95,10 +91,8 @@ namespace TrayServiceControl
             if (Service.Status == ServiceControllerStatus.Stopped)
             {
                 Service.Start();
-                //StartName = "Starting";
                 // TODO: This could take time - make async
                 Service.WaitForStatus(ServiceControllerStatus.Running);
-
 
                 StartVisibility = System.Windows.Visibility.Collapsed;
                 StopVisibility = System.Windows.Visibility.Visible;
@@ -189,8 +183,7 @@ namespace TrayServiceControl
             get
             {
                 return (Service.Status == ServiceControllerStatus.Running) ?
-                    ServiceControl.ServiceToProcess(Service) :
-                    null;
+                    ServiceControl.ServiceToProcess(Service) : null;
             }
         }
 
@@ -233,12 +226,10 @@ namespace TrayServiceControl
                     try
                     {
                         debugger.Attach(process.Id);
-                        //AttachName = "Detach";
                         AttachVisibility = System.Windows.Visibility.Collapsed;
                         DetachVisibility = System.Windows.Visibility.Visible;
 
                         DetachCommand = new ActionCommand(() => { Detach(debugger); },
-                            IsElevated &&
                             Service.Status == ServiceControllerStatus.Running &&
                             VsEnvironment.Debuggers.Any());
                         OnPropertyChanged("DetachCommand");
@@ -249,7 +240,7 @@ namespace TrayServiceControl
                     }
                 }
             }
-            ((ActionCommand)AttachCommand).Enabled = IsElevated &&
+            ((ActionCommand)AttachCommand).Enabled = 
                 Service.Status == ServiceControllerStatus.Running &&
                 VsEnvironment.Debuggers.Any();
         }
@@ -273,19 +264,10 @@ namespace TrayServiceControl
                     }
                 }
             }
-            ((ActionCommand)AttachCommand).Enabled = IsElevated &&
+            ((ActionCommand)AttachCommand).Enabled = 
                 Service.Status == ServiceControllerStatus.Running &&
                 VsEnvironment.Debuggers.Any();
         }
 
-        // TODO: factor out!
-        public bool IsElevated
-        {
-            get
-            {
-                return new WindowsPrincipal(WindowsIdentity.GetCurrent()).
-                    IsInRole(WindowsBuiltInRole.Administrator);
-            }
-        }
     }
 }
