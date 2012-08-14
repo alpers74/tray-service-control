@@ -9,6 +9,8 @@ namespace TrayServiceControl.Debugging
     {
         void Attach(int pid);
         void Detach(int pid);
+        bool IsAttachedTo(int pid);
+
         string Version { get; }
         string Solution { get; }
         string Name { get; }

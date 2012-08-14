@@ -51,5 +51,4 @@ namespace TrayServiceControl.Debugging
             ? Path.GetFileNameWithoutExtension(_dte.Solution.FullName) : "No Solution"; } } }
         public string Name { get { using (new MessageFilter()) { return _dte.Name; } } }
     }
-
 }
