@@ -23,25 +23,32 @@ namespace TrayServiceControl.Debugging
         {
             get
             {
-                List<IVsDebugger> result = new List<IVsDebugger>();
-                using (var rot = RunningObjectTable.Get())
+                try
                 {
-                    rot.VisitRunning(moniker =>
+                    List<IVsDebugger> result = new List<IVsDebugger>();
+                    using (var rot = RunningObjectTable.Get())
                     {
-                        string displayName;
-                        using (var ctx = new BindContext())
+                        rot.VisitRunning(moniker =>
                         {
-                            moniker.GetDisplayName(ctx.Value, null, out displayName);
-                        }
-                        if (displayName.StartsWith("!VisualStudio."))
-                        {
-                            var dte = rot.GetObject(moniker) as DTE;
-                            if (dte != null)
-                                result.Add(new VsDebugger(dte));
-                        }
-                    });
+                            string displayName;
+                            using (var ctx = new BindContext())
+                            {
+                                moniker.GetDisplayName(ctx.Value, null, out displayName);
+                            }
+                            if (displayName.StartsWith("!VisualStudio."))
+                            {
+                                var dte = rot.GetObject(moniker) as DTE;
+                                if (dte != null)
+                                    result.Add(new VsDebugger(dte));
+                            }
+                        });
+                    }
+                    return result;
                 }
-                return result;
+                catch (COMException)
+                {
+                    return Enumerable.Empty<IVsDebugger>();
+                }
             }
         }
     }
